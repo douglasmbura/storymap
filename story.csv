@@ -1,11 +1,11 @@
-Chapter,Media Link,Description,Marker,Location Name,Latitude,Longitude
-Hartford Public High School 1847,photos,This scroll-driven story map is built using open-source Leaflet code and a linked Google Sheet for data. The interactive design is ideal for telling a story that brings users to different locations on a map. Or users can click on any marker to go directly to that chapter.,,,1.1126819,37.454303
-Hartford Public High School 1905,photos,"In the linked Google Sheet, Insert your point locations, zoom levels, narrative text, and map options (such as title, basemap style, and other settings). Click on the ""View data"" link at the bottom of this map to view the linked Google Sheet.",Hidden,,41.7677,-72.6848
-Hartford Public High School 2011,photos,"Images can be uploaded a local subfolder, or pulled from an external URL (such as this photo on a Flickr server). The code automatically resizes images to fit the story map template, and you can modify the width and other settings in the Google Sheet Options tab.",Numbered,"55 Forest St, Hartford CT",1.1151,37.4648
+Chapter,Media Link,Description,Marker,Location Name,Latitude,Longitude,Zoom
+Hartford Public High School 1847,photos,This scroll-driven story map is built using open-source Leaflet code and a linked Google Sheet for data. The interactive design is ideal for telling a story that brings users to different locations on a map. Or users can click on any marker to go directly to that chapter.,,,1.1126819,37.454303,12
+Hartford Public High School 1905,photos,"In the linked Google Sheet, Insert your point locations, zoom levels, narrative text, and map options (such as title, basemap style, and other settings). Click on the ""View data"" link at the bottom of this map to view the linked Google Sheet.",Hidden,,41.7677,-72.6848,13
+Hartford Public High School 2011,photos,"Images can be uploaded a local subfolder, or pulled from an external URL (such as this photo on a Flickr server). The code automatically resizes images to fit the story map template, and you can modify the width and other settings in the Google Sheet Options tab.",Numbered,"55 Forest St, Hartford CT",1.1151,37.4648,10
 Jackie McLean & The Artists Collective,photos,"Along with images, Storymaps supports audio files and
 YouTube videos. Audio files must be mp3 (recommended),
 ogg, or wav: the map will generate an &lt;audio&gt; tag fo
- them instead of &lt;img&gt;.",,"1200 Albany Ave, Hartford CT",41.782032,-72.69578
+ them instead of &lt;img&gt;.",,"1200 Albany Ave, Hartford CT",41.782032,-72.69578,15
 Bradley Airport Windsor Locks,photos,"The Leafet 1.x code includes a 'fly to' feature that animates traveling from one map point to the next, which is ideal for transporting users across long distances.",,"Bradley Airport, 
-Schoephoester Rd, Windsor Locks, CT 06096",1.1168,37.4677
-"Trinity College, Hartford",photos,"Create your own story map using the step-by-step tutorial in <a href=""http://datavizforall.org/leaflet/storymaps"" target=""_blank"">Data Visualization For All</a>, an open-access textbook created at Trinity College, Hartford CT. ",Plain,"300 Summit St, Hartford CT",41.7473639,-72.6907806
+Schoephoester Rd, Windsor Locks, CT 06096",1.1168,37.4677,14
+"Trinity College, Hartford",photos,"Create your own story map using the step-by-step tutorial in <a href=""http://datavizforall.org/leaflet/storymaps"" target=""_blank"">Data Visualization For All</a>, an open-access textbook created at Trinity College, Hartford CT. ",Plain,"300 Summit St, Hartford CT",41.7473639,-72.6907806,10
