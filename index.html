@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dynamic StoryMap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <style>
+    body { margin: 0; display: flex; font-family: sans-serif; }
+    #map { height: 100vh; width: 50%; }
+    #story { width: 50%; padding: 1rem; overflow-y: scroll; height: 100vh; }
+    .chapter { margin-bottom: 2rem; }
+    .chapter h2 { margin-bottom: 0.5rem; }
+    .media { margin-top: 0.5rem; }
+    .media img { width: 100%; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="story"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+    const map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    const storyContainer = document.getElementById('story');
+
+    // Utility to load multiple images until one fails
+    function loadSequentialImages(prefix, container) {
+      let index = 1;
+      const loadNext = () => {
+        const img = new Image();
+        img.src = `photos/${prefix}_${index}.jpg`;
+        img.onload = () => {
+          container.appendChild(img);
+          index++;
+          loadNext();
+        };
+        img.onerror = () => {}; // stop when no more images
+      };
+      loadNext();
+    }
+
+    fetch('story.csv')
+      .then(response => response.text())
+      .then(csv => {
+        const data = Papa.parse(csv, { header: true }).data;
+
+        data.forEach((row, i) => {
+          const chapter = document.createElement('div');
+          chapter.className = 'chapter';
+
+          const title = document.createElement('h2');
+          title.textContent = row.chapter;
+          chapter.appendChild(title);
+
+          const desc = document.createElement('p');
+          desc.innerHTML = row.description;
+          chapter.appendChild(desc);
+
+          const mediaDiv = document.createElement('div');
+          mediaDiv.className = 'media';
+          loadSequentialImages(row.media_prefix || `chapter${i + 1}`, mediaDiv);
+          chapter.appendChild(mediaDiv);
+
+          storyContainer.appendChild(chapter);
+
+          // Marker and camera
+          if (row.lat && row.lon) {
+            const marker = L.marker([parseFloat(row.lat), parseFloat(row.lon)])
+              .addTo(map)
+              .bindPopup(row.chapter);
+          }
+        });
+
+        // Fly to first chapter location
+        if (data.length && data[0].lat && data[0].lon) {
+          map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 10);
+        }
+      });
+  </script>
+</body>
+</html>
