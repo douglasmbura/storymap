@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dynamic StoryMap</title>
+  <title>StoryMap</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <style>
@@ -12,33 +12,9 @@
       height: 100%;
       overflow: hidden;
     }
-    #splash {
-      position: fixed;
-      z-index: 1000;
-      background: white;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-      padding: 2rem;
-    }
-    #splash h1 { font-size: 2rem; }
-    #splash button {
-      padding: 0.8rem 1.5rem;
-      margin-top: 1rem;
-      font-size: 1rem;
-      background: #0078A8;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
 
     #container { display: flex; height: 100vh; }
-    #map { width: 50%; height: 100%; }
+    #map { width: 50%; height: 100%; position: relative; }
     #story {
       width: 50%;
       height: 100%;
@@ -60,16 +36,13 @@
       border-color: #0078A8;
       background: #e6f4f9;
     }
-    .chapter h2 { margin-top: 0; }
-    .media-viewer, .audio-viewer {
-      text-align: center;
-      margin-top: 1rem;
-    }
+
     .media-viewer img {
       max-width: 100%;
       max-height: 300px;
       border-radius: 6px;
     }
+
     .nav-btn {
       margin: 0.5rem;
       padding: 6px 12px;
@@ -79,17 +52,19 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .nav-btn:hover { background: #005f85; }
+
     .timeline {
       position: fixed;
       top: 50%;
       left: 0;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255,255,255,0.9);
       padding: 1rem;
       border-radius: 0 5px 5px 0;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      z-index: 999;
     }
+
     .timeline a {
       display: block;
       margin: 0.3rem 0;
@@ -97,18 +72,63 @@
       color: #0078A8;
       font-weight: bold;
     }
+
+    .timeline a.active {
+      background: #0078A8;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .audio-viewer, .media-viewer {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    /* Splash as map popup */
+    #splash {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    #splash h2 {
+      margin-top: 0;
+    }
+
+    #splash button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: #0078A8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #splash button:hover {
+      background: #005f85;
+    }
   </style>
 </head>
 <body>
 
-<div id="splash">
-  <h1>Welcome to the StoryMap</h1>
-  <p>A visual journey through geographic stories with narration and images.</p>
-  <button onclick="startStory()">Start</button>
-</div>
-
-<div id="container" style="display: none;">
-  <div id="map"></div>
+<div id="container">
+  <div id="map">
+    <div id="splash">
+      <h2>Welcome to the StoryMap</h2>
+      <p>A journey through stories with maps, images, and narration.</p>
+      <button onclick="startStory()">Start</button>
+    </div>
+  </div>
   <div id="story"></div>
   <div class="timeline" id="timeline"></div>
 </div>
@@ -119,7 +139,6 @@
 <script>
 function startStory() {
   document.getElementById('splash').style.display = 'none';
-  document.getElementById('container').style.display = 'flex';
 }
 
 const map = L.map('map').setView([0, 0], 2);
@@ -132,13 +151,15 @@ L.control.layers({ "OSM": osm, "Esri Satellite": esri }).addTo(map);
 const storyContainer = document.getElementById('story');
 const timelineContainer = document.getElementById('timeline');
 let chapterElements = [];
+let timelineLinks = [];
 
 function createMediaViewer(prefix, container, type) {
   let index = 1;
   const sources = [];
 
   function tryNext() {
-    const file = `${type}/${prefix}_${index}.${type === 'photos' ? 'jpg' : 'mp3'}`;
+    const ext = type === 'photos' ? 'jpg' : 'mp3';
+    const file = `${type}/` + prefix + `_${index}.${ext}`;
     if (type === 'photos') {
       const img = new Image();
       img.src = file;
@@ -154,7 +175,7 @@ function createMediaViewer(prefix, container, type) {
 
   function setupViewer() {
     if (sources.length === 0) {
-      container.innerHTML = `<p><em>No ${type} available.</em></p>`;
+      container.innerHTML = `<p><em>No ${type} found.</em></p>`;
       return;
     }
 
@@ -162,9 +183,9 @@ function createMediaViewer(prefix, container, type) {
     if (type === 'photos') {
       const img = document.createElement('img');
       img.src = sources[current];
-
       const viewer = document.createElement('div');
       viewer.className = 'media-viewer';
+
       const prev = button('Previous', () => { current = (current - 1 + sources.length) % sources.length; img.src = sources[current]; });
       const next = button('Next', () => { current = (current + 1) % sources.length; img.src = sources[current]; });
 
@@ -177,6 +198,7 @@ function createMediaViewer(prefix, container, type) {
 
       const viewer = document.createElement('div');
       viewer.className = 'audio-viewer';
+
       const prev = button('Previous', () => { current = (current - 1 + sources.length) % sources.length; audio.src = sources[current]; audio.play(); });
       const next = button('Next', () => { current = (current + 1) % sources.length; audio.src = sources[current]; audio.play(); });
 
@@ -187,8 +209,8 @@ function createMediaViewer(prefix, container, type) {
 
   const button = (text, onClick) => {
     const btn = document.createElement('button');
-    btn.textContent = text;
     btn.className = 'nav-btn';
+    btn.textContent = text;
     btn.onclick = onClick;
     return btn;
   }
@@ -196,17 +218,16 @@ function createMediaViewer(prefix, container, type) {
   tryNext();
 }
 
-function flyToLocation(lat, lon, zoom) {
+function flyTo(lat, lon, zoom) {
   map.flyTo([lat, lon], zoom, {
-    animate: true,
-    duration: 2
+    duration: 2,
+    animate: true
   });
 }
 
 function highlightChapter(index) {
-  chapterElements.forEach((el, i) => {
-    el.classList.toggle('active', i === index);
-  });
+  chapterElements.forEach((el, i) => el.classList.toggle('active', i === index));
+  timelineLinks.forEach((link, i) => link.classList.toggle('active', i === index));
 }
 
 fetch('story.csv')
@@ -219,20 +240,19 @@ fetch('story.csv')
       div.className = 'chapter';
       div.id = `chapter-${i}`;
 
-      const h2 = document.createElement('h2');
-      h2.textContent = row['Chapter'];
-      div.appendChild(h2);
+      const title = document.createElement('h2');
+      title.textContent = row['Chapter'];
+      div.appendChild(title);
 
-      const p = document.createElement('p');
-      p.textContent = row['Description'];
-      div.appendChild(p);
+      const desc = document.createElement('p');
+      desc.textContent = row['Description'];
+      div.appendChild(desc);
 
-      // Images
+      // Media
       const photoDiv = document.createElement('div');
       div.appendChild(photoDiv);
       createMediaViewer(`chapter${i + 1}`, photoDiv, 'photos');
 
-      // Audio
       const audioDiv = document.createElement('div');
       div.appendChild(audioDiv);
       createMediaViewer(`chapter${i + 1}`, audioDiv, 'audio');
@@ -240,13 +260,14 @@ fetch('story.csv')
       storyContainer.appendChild(div);
       chapterElements.push(div);
 
-      // Timeline link
+      // Timeline
       const link = document.createElement('a');
       link.textContent = row['Chapter'];
       link.href = `#chapter-${i}`;
       timelineContainer.appendChild(link);
+      timelineLinks.push(link);
 
-      // Marker
+      // Marker + observer
       const lat = parseFloat(row['Latitude']);
       const lon = parseFloat(row['Longitude']);
       const zoom = parseInt(row['Zoom']) || 10;
@@ -255,11 +276,10 @@ fetch('story.csv')
         L.marker([lat, lon]).addTo(map).bindPopup(`<strong>${row['Chapter']}</strong>`);
       }
 
-      // Intersection observer for scroll spy + fly
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            flyToLocation(lat, lon, zoom);
+            flyTo(lat, lon, zoom);
             highlightChapter(i);
           }
         });
@@ -268,9 +288,9 @@ fetch('story.csv')
       observer.observe(div);
     });
 
-    // Initial map position
-    const first = data[0];
-    if (first) {
+    // Initial map focus
+    if (data.length > 0) {
+      const first = data[0];
       const lat = parseFloat(first['Latitude']);
       const lon = parseFloat(first['Longitude']);
       const zoom = parseInt(first['Zoom']) || 10;
