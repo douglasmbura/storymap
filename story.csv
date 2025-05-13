@@ -1,42 +1,42 @@
 Chapter,Latitude,Longitude,Description,Zoom,Media Link,Audio
-Lawa,1.1185,37.456,"Images can be uploaded a local subfolder, or pulled from an external URL (such as this photo on a Flickr server). The code automatically resizes images to fit the story map template, and you can modify the width and other settings in the Google Sheet Options tab.",10,photos,
+Lawa,1.1185,37.456,"Images can be uploaded a local subfolder, or pulled from an external URL (such as this photo on a Flickr server). The code automatically resizes images to fit the story map template, and you can modify the width and other settings in the Google Sheet Options tab.",16,photos,
 Releasing Pan,1.1189824,37.4706278,,15,photos,
-Reteti House - New water point,1.1126819,37.454303,,12,photos,
-Elephant Rock 4 - New Site,1.1145,37.469,This scroll-driven story map is built using open-source Leaflet code and a linked Google Sheet for data. The interactive design is ideal for telling a story that brings users to different locations on a map. Or users can click on any marker to go directly to that chapter.,12, ,audio
-Football Field Resting Place,1.1123,37.4604,"In the linked Google Sheet, Insert your point locations, zoom levels, narrative text, and map options (such as title, basemap style, and other settings). Click on the ""View data"" link at the bottom of this map to view the linked Google Sheet.",13, ,audio
+Reteti House - New water point,1.1126819,37.454303,,17,photos,
+Elephant Rock 4 - New Site,1.1145,37.469,This scroll-driven story map is built using open-source Leaflet code and a linked Google Sheet for data. The interactive design is ideal for telling a story that brings users to different locations on a map. Or users can click on any marker to go directly to that chapter.,15, ,audio
+Football Field Resting Place,1.1123,37.4604,"In the linked Google Sheet, Insert your point locations, zoom levels, narrative text, and map options (such as title, basemap style, and other settings). Click on the ""View data"" link at the bottom of this map to view the linked Google Sheet.",16, ,audio
 Lawa2,1.1184,37.4568,"Along with images, Storymaps supports audio files and
 YouTube videos. Audio files must be mp3 (recommended),
 ogg, or wav: the map will generate an &lt;audio&gt; tag fo
- them instead of &lt;img&gt;.",15,  ,audio
-Lawa4,1.1201,37.4575,"The Leafet 1.x code includes a 'fly to' feature that animates traveling from one map point to the next, which is ideal for transporting users across long distances.",14, ,audio
-Lchura,1.11244,37.474062,"Create your own story map using the step-by-step tutorial in an open-access textbook created at Trinity College, Hartford CT. ",10, ,audio
-Lesiteti,1.12133,37.46534,,11,,audio
-Lmurgusiani (Lturoto),1.0214,37.4019,,12,,audio
-Ltepes Corridor,1.11357,37.46995,,10,,audio
-Ltepes Corridor 2,1.11613,37.46782,,14,,audio
+ them instead of &lt;img&gt;.",17,  ,audio
+Lawa4,1.1201,37.4575,"The Leafet 1.x code includes a 'fly to' feature that animates traveling from one map point to the next, which is ideal for transporting users across long distances.",18, ,audio
+Lchura,1.11244,37.474062,"Create your own story map using the step-by-step tutorial in an open-access textbook created at Trinity College, Hartford CT. ",16, ,audio
+Lesiteti,1.12133,37.46534,,15,,audio
+Lmurgusiani (Lturoto),1.0214,37.4019,,17,,audio
+Ltepes Corridor,1.11357,37.46995,,16,,audio
+Ltepes Corridor 2,1.11613,37.46782,,18,,audio
 Ltorot Lolgiria,1.1151,37.4648,,15,,audio
-Ltorot Lolgiria 2,1.1135,37.4649,,12,,audio
-Nelmasuuti 1,1.1177,37.4655,,10,,audio
-Nelmasuuti 2,1.1172,37.4659,,14,,audio
-Nelmasuuti 3,1.1173,37.4669,,13,,audio
-Nelmasuuti 5,1.1164,37.4691,,11,,audio
-Nelmasuuti 6,1.1168,37.4677,,15,,audio
-Nkapune Rock Cave,1.1055,37.4599,,12,,audio
-Nkongu,1.0142,37.4037,,10,,audio
-Nkutoto,1.1177,37.47,,14,,audio
-Nkutoto Elmasuuti 3,1.12,37.46805,,13,,audio
-Nkutoto Elmasuuti 4,1.12104,37.46904,,11,,audio
-Quarantine,1.11567,37.46021,,10,,audio
-Release Corridor 2,1.1143675,37.47596158,,14,,audio
-Reteti House Lawai Resting,1.111,37.4543,,14,,audio
-Reteti House Road Corridor,1.1071,37.4568,,13,,audio
-Reteti Old Road,1.1118,37.4613,,15,,audio
-Safaricom Rock,1.11851,37.46338,,12,,audio
-Safaricom Rock 2,1.1159,37.4647,,10,,audio
-Sarara Naado,1.0581,37.4077,,11,,audio
+Ltorot Lolgiria 2,1.1135,37.4649,,18,,audio
+Nelmasuuti 1,1.1177,37.4655,,16,,audio
+Nelmasuuti 2,1.1172,37.4659,,17,,audio
+Nelmasuuti 3,1.1173,37.4669,,16,,audio
+Nelmasuuti 5,1.1164,37.4691,,17,,audio
+Nelmasuuti 6,1.1168,37.4677,,16,,audio
+Nkapune Rock Cave,1.1055,37.4599,,15,,audio
+Nkongu,1.0142,37.4037,,18,,audio
+Nkutoto,1.1177,37.47,,15,,audio
+Nkutoto Elmasuuti 3,1.12,37.46805,,17,,audio
+Nkutoto Elmasuuti 4,1.12104,37.46904,,18,,audio
+Quarantine,1.11567,37.46021,,16,,audio
+Release Corridor 2,1.1143675,37.47596158,,17,,audio
+Reteti House Lawai Resting,1.111,37.4543,,15,,audio
+Reteti House Road Corridor,1.1071,37.4568,,18,,audio
+Reteti Old Road,1.1118,37.4613,,16,,audio
+Safaricom Rock,1.11851,37.46338,,17,,audio
+Safaricom Rock 2,1.1159,37.4647,,15,,audio
+Sarara Naado,1.0581,37.4077,,16,,audio
 Singing Wells 1,1.0437548,37.4095797,,15,,audio
-Singing Wells 2,1.0444,37.4089,,10,,audio
-Soito Naarok,1.1203,37.4588,,12,,audio
-Soito Naarok Waterpoint,1.1199,37.46,,11,,audio
-Stables,1.1147,37.460833,,14,,audio
-Tree House,0.9958217,37.4072075,,12,,audio
+Singing Wells 2,1.0444,37.4089,,18,,audio
+Soito Naarok,1.1203,37.4588,,16,,audio
+Soito Naarok Waterpoint,1.1199,37.46,,17,,audio
+Stables,1.1147,37.460833,,16,,audio
+Tree House,0.9958217,37.4072075,,15,,audio
