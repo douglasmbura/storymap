@@ -4,30 +4,47 @@
   <meta charset="UTF-8" />
   <title>Dynamic StoryMap</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <style>
-    body {
+    body, html {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      height: 100%;
+      overflow: hidden;
+    }
+    #splash {
+      position: fixed;
+      z-index: 1000;
+      background: white;
+      width: 100%;
+      height: 100%;
       display: flex;
-      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem;
+    }
+    #splash h1 { font-size: 2rem; }
+    #splash button {
+      padding: 0.8rem 1.5rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      background: #0078A8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    #map {
-      width: 50%;
-      height: 100vh;
-    }
-
+    #container { display: flex; height: 100vh; }
+    #map { width: 50%; height: 100%; }
     #story {
       width: 50%;
-      height: 100vh;
+      height: 100%;
       overflow-y: auto;
-      scroll-behavior: smooth;
-      padding: 1rem;
       background: #f9f9f9;
+      padding: 1rem;
       box-sizing: border-box;
     }
 
@@ -35,137 +52,160 @@
       margin-bottom: 3rem;
       padding: 1rem;
       border-left: 4px solid transparent;
-      transition: border-color 0.3s, background 0.3s;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: background 0.3s, border-color 0.3s;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-
     .chapter.active {
       border-color: #0078A8;
       background: #e6f4f9;
     }
-
-    .chapter h2 {
-      margin: 0 0 0.5rem;
-    }
-
-    .media-viewer {
-      position: relative;
+    .chapter h2 { margin-top: 0; }
+    .media-viewer, .audio-viewer {
       text-align: center;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
     }
-
     .media-viewer img {
       max-width: 100%;
       max-height: 300px;
       border-radius: 6px;
     }
-
     .nav-btn {
-      margin: 5px;
+      margin: 0.5rem;
       padding: 6px 12px;
-      font-size: 14px;
       background: #0078A8;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
-
-    .nav-btn:hover {
-      background: #005f85;
+    .nav-btn:hover { background: #005f85; }
+    .timeline {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      border-radius: 0 5px 5px 0;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+    .timeline a {
+      display: block;
+      margin: 0.3rem 0;
+      text-decoration: none;
+      color: #0078A8;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<div id="map"></div>
-<div id="story"></div>
+<div id="splash">
+  <h1>Welcome to the StoryMap</h1>
+  <p>A visual journey through geographic stories with narration and images.</p>
+  <button onclick="startStory()">Start</button>
+</div>
+
+<div id="container" style="display: none;">
+  <div id="map"></div>
+  <div id="story"></div>
+  <div class="timeline" id="timeline"></div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
-const map = L.map('map', { zoomControl: true }).setView([0, 0], 2);
+function startStory() {
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('container').style.display = 'flex';
+}
 
-// Basemaps
-const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
+const map = L.map('map').setView([0, 0], 2);
+const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: '© Esri'
 });
-osm.addTo(map);
-
-const baseMaps = {
-  "OpenStreetMap": osm,
-  "Esri Satellite": esri
-};
-L.control.layers(baseMaps).addTo(map);
+L.control.layers({ "OSM": osm, "Esri Satellite": esri }).addTo(map);
 
 const storyContainer = document.getElementById('story');
+const timelineContainer = document.getElementById('timeline');
 let chapterElements = [];
 
-function loadMedia(prefix, mediaContainer) {
+function createMediaViewer(prefix, container, type) {
   let index = 1;
-  const images = [];
+  const sources = [];
 
-  const loadNext = () => {
-    const img = new Image();
-    const src = `photos/${prefix}_${index}.jpg`;
-    img.src = src;
-    img.onload = () => {
-      images.push(src);
-      index++;
-      loadNext();
-    };
-    img.onerror = () => {
-      if (images.length > 0) {
-        setupViewer(images, mediaContainer);
-      } else {
-        mediaContainer.innerHTML = "<p><em>No media available.</em></p>";
-      }
-    };
-  };
-  loadNext();
-}
-
-function setupViewer(images, container) {
-  let current = 0;
-  const imgElement = document.createElement('img');
-  imgElement.src = images[current];
-
-  const prevBtn = document.createElement('button');
-  prevBtn.textContent = 'Previous';
-  prevBtn.className = 'nav-btn';
-  prevBtn.onclick = () => {
-    current = (current - 1 + images.length) % images.length;
-    imgElement.src = images[current];
-  };
-
-  const nextBtn = document.createElement('button');
-  nextBtn.textContent = 'Next';
-  nextBtn.className = 'nav-btn';
-  nextBtn.onclick = () => {
-    current = (current + 1) % images.length;
-    imgElement.src = images[current];
-  };
-
-  const viewer = document.createElement('div');
-  viewer.className = 'media-viewer';
-  viewer.appendChild(imgElement);
-  viewer.appendChild(prevBtn);
-  viewer.appendChild(nextBtn);
-
-  container.appendChild(viewer);
-}
-
-function activateChapter(index, lat, lon, zoom) {
-  map.setView([lat, lon], zoom || 10);
-  chapterElements.forEach((el, i) => {
-    if (i === index) {
-      el.classList.add('active');
+  function tryNext() {
+    const file = `${type}/${prefix}_${index}.${type === 'photos' ? 'jpg' : 'mp3'}`;
+    if (type === 'photos') {
+      const img = new Image();
+      img.src = file;
+      img.onload = () => { sources.push(file); index++; tryNext(); };
+      img.onerror = () => setupViewer();
     } else {
-      el.classList.remove('active');
+      fetch(file, { method: 'HEAD' }).then(res => {
+        if (res.ok) { sources.push(file); index++; tryNext(); }
+        else setupViewer();
+      });
     }
+  }
+
+  function setupViewer() {
+    if (sources.length === 0) {
+      container.innerHTML = `<p><em>No ${type} available.</em></p>`;
+      return;
+    }
+
+    let current = 0;
+    if (type === 'photos') {
+      const img = document.createElement('img');
+      img.src = sources[current];
+
+      const viewer = document.createElement('div');
+      viewer.className = 'media-viewer';
+      const prev = button('Previous', () => { current = (current - 1 + sources.length) % sources.length; img.src = sources[current]; });
+      const next = button('Next', () => { current = (current + 1) % sources.length; img.src = sources[current]; });
+
+      viewer.appendChild(img); viewer.appendChild(prev); viewer.appendChild(next);
+      container.appendChild(viewer);
+    } else {
+      const audio = document.createElement('audio');
+      audio.src = sources[current];
+      audio.controls = true;
+
+      const viewer = document.createElement('div');
+      viewer.className = 'audio-viewer';
+      const prev = button('Previous', () => { current = (current - 1 + sources.length) % sources.length; audio.src = sources[current]; audio.play(); });
+      const next = button('Next', () => { current = (current + 1) % sources.length; audio.src = sources[current]; audio.play(); });
+
+      viewer.appendChild(audio); viewer.appendChild(prev); viewer.appendChild(next);
+      container.appendChild(viewer);
+    }
+  }
+
+  const button = (text, onClick) => {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    btn.className = 'nav-btn';
+    btn.onclick = onClick;
+    return btn;
+  }
+
+  tryNext();
+}
+
+function flyToLocation(lat, lon, zoom) {
+  map.flyTo([lat, lon], zoom, {
+    animate: true,
+    duration: 2
+  });
+}
+
+function highlightChapter(index) {
+  chapterElements.forEach((el, i) => {
+    el.classList.toggle('active', i === index);
   });
 }
 
@@ -175,24 +215,38 @@ fetch('story.csv')
     const data = Papa.parse(csv, { header: true }).data;
 
     data.forEach((row, i) => {
-      const chapterDiv = document.createElement('div');
-      chapterDiv.className = 'chapter';
+      const div = document.createElement('div');
+      div.className = 'chapter';
+      div.id = `chapter-${i}`;
 
-      const title = document.createElement('h2');
-      title.textContent = row['Chapter'];
-      chapterDiv.appendChild(title);
+      const h2 = document.createElement('h2');
+      h2.textContent = row['Chapter'];
+      div.appendChild(h2);
 
-      const desc = document.createElement('p');
-      desc.textContent = row['Description'];
-      chapterDiv.appendChild(desc);
+      const p = document.createElement('p');
+      p.textContent = row['Description'];
+      div.appendChild(p);
 
-      const mediaDiv = document.createElement('div');
-      chapterDiv.appendChild(mediaDiv);
-      loadMedia(`chapter${i + 1}`, mediaDiv);
+      // Images
+      const photoDiv = document.createElement('div');
+      div.appendChild(photoDiv);
+      createMediaViewer(`chapter${i + 1}`, photoDiv, 'photos');
 
-      storyContainer.appendChild(chapterDiv);
-      chapterElements.push(chapterDiv);
+      // Audio
+      const audioDiv = document.createElement('div');
+      div.appendChild(audioDiv);
+      createMediaViewer(`chapter${i + 1}`, audioDiv, 'audio');
 
+      storyContainer.appendChild(div);
+      chapterElements.push(div);
+
+      // Timeline link
+      const link = document.createElement('a');
+      link.textContent = row['Chapter'];
+      link.href = `#chapter-${i}`;
+      timelineContainer.appendChild(link);
+
+      // Marker
       const lat = parseFloat(row['Latitude']);
       const lon = parseFloat(row['Longitude']);
       const zoom = parseInt(row['Zoom']) || 10;
@@ -201,24 +255,31 @@ fetch('story.csv')
         L.marker([lat, lon]).addTo(map).bindPopup(`<strong>${row['Chapter']}</strong>`);
       }
 
-      // Add observer to track chapter in view
+      // Intersection observer for scroll spy + fly
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            activateChapter(i, lat, lon, zoom);
+            flyToLocation(lat, lon, zoom);
+            highlightChapter(i);
           }
         });
       }, { threshold: 0.5 });
 
-      observer.observe(chapterDiv);
+      observer.observe(div);
     });
 
-    // Set initial view
+    // Initial map position
     const first = data[0];
-    if (first && first['Latitude'] && first['Longitude']) {
-      map.setView([parseFloat(first['Latitude']), parseFloat(first['Longitude'])], parseInt(first['Zoom']) || 8);
+    if (first) {
+      const lat = parseFloat(first['Latitude']);
+      const lon = parseFloat(first['Longitude']);
+      const zoom = parseInt(first['Zoom']) || 10;
+      if (!isNaN(lat) && !isNaN(lon)) {
+        map.setView([lat, lon], zoom);
+      }
     }
   });
 </script>
+
 </body>
 </html>
