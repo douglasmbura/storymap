@@ -13,7 +13,67 @@
       overflow: hidden;
     }
 
-    #container { display: flex; height: 100vh; }
+    /* Menu Bar Styles */
+    #menu-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #0078A8;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      box-sizing: border-box;
+      z-index: 1001;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #logo {
+      height: 40px;
+      margin-right: 15px;
+    }
+
+    #project-info {
+      flex-grow: 1;
+    }
+
+    #project-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    #project-subtitle {
+      font-size: 0.8rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    #menu-items {
+      display: flex;
+      gap: 20px;
+    }
+
+    .menu-item {
+      color: white;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+
+    .menu-item:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    #container { 
+      display: flex; 
+      height: 100vh; 
+      padding-top: 60px; /* Account for menu bar */
+      box-sizing: border-box;
+    }
     #map { width: 50%; height: 100%; position: relative; }
     #story {
       width: 50%;
@@ -53,36 +113,23 @@
       cursor: pointer;
     }
 
-    .timeline {
-      position: fixed;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.9);
-      padding: 1rem;
-      border-radius: 0 5px 5px 0;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-      z-index: 999;
-    }
-
-    .timeline a {
-      display: block;
-      margin: 0.3rem 0;
-      text-decoration: none;
-      color: #0078A8;
-      font-weight: bold;
-    }
-
-    .timeline a.active {
-      background: #0078A8;
-      color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-    }
-
     .audio-viewer, .media-viewer {
       text-align: center;
       margin-top: 1rem;
+    }
+
+    .audio-file-name {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Highlighted marker style */
+    .highlighted-marker {
+      filter: hue-rotate(180deg) saturate(2);
+      transform: scale(1.2);
+      transition: all 0.3s;
     }
 
     /* Splash as map popup */
@@ -121,6 +168,20 @@
 </head>
 <body>
 
+<!-- Menu Bar -->
+<div id="menu-bar">
+  <img id="logo" src="logo.png" alt="Project Logo">
+  <div id="project-info">
+    <h1 id="project-title">Hartford Historical StoryMap</h1>
+    <p id="project-subtitle">Exploring the rich history of Hartford through interactive media</p>
+  </div>
+  <div id="menu-items">
+    <a href="#" class="menu-item">This Storymap</a>
+    <a href="#" class="menu-item">Dashboard</a>
+    <a href="#" class="menu-item">Main Map</a>
+  </div>
+</div>
+
 <div id="container">
   <div id="map">
     <div id="splash">
@@ -130,7 +191,6 @@
     </div>
   </div>
   <div id="story"></div>
-  <div class="timeline" id="timeline"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -149,16 +209,15 @@ const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/W
 L.control.layers({ "OSM": osm, "Esri Satellite": esri }).addTo(map);
 
 const storyContainer = document.getElementById('story');
-const timelineContainer = document.getElementById('timeline');
 let chapterElements = [];
-let timelineLinks = [];
+let markers = []; // Store all markers for highlighting
 
 function createMediaViewer(prefix, container, type) {
   let index = 1;
   const sources = [];
 
   function tryNext() {
-    const ext = type === 'photos' ? 'jpg' : 'mp3';
+    const ext = type === 'photos' ? 'jpg' : 'wav'; // Changed to .wav for audio
     const file = `${type}/` + prefix + `_${index}.${ext}`;
     if (type === 'photos') {
       const img = new Image();
@@ -196,13 +255,34 @@ function createMediaViewer(prefix, container, type) {
       audio.src = sources[current];
       audio.controls = true;
 
+      const fileNameDisplay = document.createElement('span');
+      fileNameDisplay.className = 'audio-file-name';
+      fileNameDisplay.textContent = sources[current].split('/').pop();
+
       const viewer = document.createElement('div');
       viewer.className = 'audio-viewer';
 
-      const prev = button('Previous', () => { current = (current - 1 + sources.length) % sources.length; audio.src = sources[current]; audio.play(); });
-      const next = button('Next', () => { current = (current + 1) % sources.length; audio.src = sources[current]; audio.play(); });
+      const prev = button('Previous', () => { 
+        current = (current - 1 + sources.length) % sources.length; 
+        audio.src = sources[current];
+        fileNameDisplay.textContent = sources[current].split('/').pop();
+        audio.play(); 
+      });
+      const next = button('Next', () => { 
+        current = (current + 1) % sources.length; 
+        audio.src = sources[current];
+        fileNameDisplay.textContent = sources[current].split('/').pop();
+        audio.play(); 
+      });
 
-      viewer.appendChild(audio); viewer.appendChild(prev); viewer.appendChild(next);
+      audio.addEventListener('play', () => {
+        fileNameDisplay.textContent = sources[current].split('/').pop();
+      });
+
+      viewer.appendChild(audio); 
+      viewer.appendChild(prev); 
+      viewer.appendChild(next);
+      viewer.appendChild(fileNameDisplay);
       container.appendChild(viewer);
     }
   }
@@ -226,8 +306,17 @@ function flyTo(lat, lon, zoom) {
 }
 
 function highlightChapter(index) {
+  // Highlight the chapter in the story panel
   chapterElements.forEach((el, i) => el.classList.toggle('active', i === index));
-  timelineLinks.forEach((link, i) => link.classList.toggle('active', i === index));
+  
+  // Highlight the corresponding marker
+  markers.forEach((marker, i) => {
+    if (i === index) {
+      marker._icon.classList.add('highlighted-marker');
+    } else {
+      marker._icon.classList.remove('highlighted-marker');
+    }
+  });
 }
 
 fetch('story.csv')
@@ -260,20 +349,20 @@ fetch('story.csv')
       storyContainer.appendChild(div);
       chapterElements.push(div);
 
-      // Timeline
-      const link = document.createElement('a');
-      link.textContent = row['Chapter'];
-      link.href = `#chapter-${i}`;
-      timelineContainer.appendChild(link);
-      timelineLinks.push(link);
-
-      // Marker + observer
+      // Marker
       const lat = parseFloat(row['Latitude']);
       const lon = parseFloat(row['Longitude']);
       const zoom = parseInt(row['Zoom']) || 10;
 
       if (!isNaN(lat) && !isNaN(lon)) {
-        L.marker([lat, lon]).addTo(map).bindPopup(`<strong>${row['Chapter']}</strong>`);
+        const marker = L.marker([lat, lon]).addTo(map).bindPopup(`<strong>${row['Chapter']}</strong>`);
+        markers.push(marker);
+        
+        // Click on marker to go to chapter
+        marker.on('click', () => {
+          div.scrollIntoView({ behavior: 'smooth' });
+          highlightChapter(i);
+        });
       }
 
       const observer = new IntersectionObserver((entries) => {
